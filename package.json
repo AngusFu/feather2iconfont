@@ -4,17 +4,18 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "svgo": "svgo -f svg",
+    "svgo": "svgo",
     "start": "node convert.js"
   },
   "author": "",
   "license": "ISC",
-  "devDependencies": {},
   "dependencies": {
-    "convertpath": "^1.0.2",
     "feather-icons": "^4.0.1",
     "mkdirp": "^0.5.1",
     "svgo": "^1.0.3",
     "xmldom": "^0.1.27"
+  },
+  "devDependencies": {
+    "convertpath": "github:AngusFu/convertpath"
   }
 }

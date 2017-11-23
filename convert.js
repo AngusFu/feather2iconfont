@@ -4,7 +4,7 @@ const { exec, execSync } = require('child_process')
 const mkdirp = require('mkdirp')
 
 const sourceDir = './node_modules/feather-icons/dist/icons/'
-runTasks().catch(e => console.log(e));
+runTasks().catch(e => console.log(e))
 
 async function runTasks () {
   const icons = fs.readdirSync(sourceDir)
@@ -19,6 +19,7 @@ async function runTasks () {
 
   while (tasks.length) {
     await tasks.shift()()
+    await sleep(10)
   }
 
   execSync('npm run svgo')
@@ -26,7 +27,7 @@ async function runTasks () {
 
 function process (file, basename) {
   const convertpath = require('convertpath')
-  const { DOMParser, XMLSerializer } = require("xmldom")
+  const { DOMParser, XMLSerializer } = require('xmldom')
 
   const parser = new DOMParser()
   const serializer = new XMLSerializer()
@@ -40,8 +41,8 @@ function process (file, basename) {
 
   const Svg = Document.documentElement
 
-  Svg.setAttribute("viewBox", "0 0 24 24")
-  Svg.setAttribute("enable-background", "new 0 0 24 24")
+  Svg.setAttribute('viewBox', '0 0 24 24')
+  Svg.setAttribute('enable-background', 'new 0 0 24 24')
   Svg.setAttribute('fill', '#fff')
 
   const stroke = {}
@@ -52,7 +53,7 @@ function process (file, basename) {
     Svg.removeAttribute(key)
   })
 
-  Array.from(Svg.childNodes).forEach(node => 
+  Array.from(Svg.childNodes).forEach(node =>
     attrs.forEach(key => node.setAttribute(key, stroke[key]))
   )
 
@@ -62,7 +63,6 @@ function process (file, basename) {
     inkscapeEdit(file, basename)
   }
 }
-
 
 function inkscapeEdit (file, basename) {
   // SEE:
@@ -105,4 +105,10 @@ function writeHTML (files) {
     )
   }</table>`
   fs.writeFileSync('./compare.html', content)
+}
+
+function sleep (t) {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => resolve(), t * 1000)
+  })
 }
