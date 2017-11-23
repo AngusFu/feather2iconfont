@@ -17,7 +17,7 @@ async function runTasks () {
       process(path.join(sourceDir, file), file)
     )
 
-  while (tasks.length > 200) {
+  while (tasks.length) {
     await tasks.shift()()
   }
 

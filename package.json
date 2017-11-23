@@ -1,10 +1,11 @@
 {
-  "name": "iconfont-test",
+  "name": "inkscape-svg",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "svgo": "svgo -f svg"
+    "svgo": "svgo -f svg",
+    "start": "node convert.js"
   },
   "author": "",
   "license": "ISC",
