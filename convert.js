@@ -3,7 +3,16 @@ const path = require('path')
 const { exec, execSync } = require('child_process')
 const mkdirp = require('mkdirp')
 
+const convertpath = require('convertpath')
+const { DOMParser, XMLSerializer } = require('xmldom')
+const parser = new DOMParser()
+const serializer = new XMLSerializer()
+
+const svg2ttf = require('svg2ttf')
+const ttf2woff = require('ttf2woff')
+
 const sourceDir = './node_modules/feather-icons/dist/icons/'
+
 runTasks().catch(e => console.log(e))
 
 async function runTasks () {
@@ -12,31 +21,53 @@ async function runTasks () {
   mkdirp('svg')
   writeHTML(icons)
 
-  const tasks = Array.from(icons)
-    .map(file =>
-      process(path.join(sourceDir, file), file)
-    )
+  // const tasks = Array.from(icons)
+  //   .map(file =>
+  //     process(path.join(sourceDir, file), file)
+  //   )
 
-  while (tasks.length) {
-    await tasks.shift()()
-    await sleep(6)
-  }
+  // while (tasks.length) {
+  //   await tasks.shift()()
+  //   await sleep(6)
+  // }
+
+  const glyphs = icons.map(basename => {
+    const file = `./svg/${basename}`
+    const Document = parseSVG(file)
+    const SVG = Document.documentElement
+    const children = Array.from(SVG.childNodes)
+
+    const d = children.reduce((acc, path) => {
+      if (path.tagName.toLowerCase() === 'path') {
+        acc += ' ' + (path.getAttribute('d') || '').replace(/z$/, '')
+      }
+
+      SVG.removeChild(path)
+
+      return acc
+    }, '')
+
+    const name = basename.replace('.svg', '')
+    return `<glyph unicode="${name}" glyph-name="${name.replace(/\d/g, '&#x3$&')}" d="${d.trim()}" />`
+  })
+
+  const template = fs.readFileSync('./template.xml').toString()
+  const xml = template.replace('____PLACEHOLDER_____', glyphs.join('\n'))
+
+  fs.writeFileSync('./dest/feather.svg', xml)
+
+  const ttf = svg2ttf(xml, {
+    ts: +new Date(),
+    version: '1.0'
+  }).buffer
+  fs.writeFileSync('./dest/feather.ttf', new Buffer(ttf))
+
+  const woff = ttf2woff(new Uint8Array(ttf))
+  fs.writeFileSync('./dest/feather.woff', new Buffer(woff.buffer))
 }
 
 function process (file, basename) {
-  const convertpath = require('convertpath')
-  const { DOMParser, XMLSerializer } = require('xmldom')
-
-  const parser = new DOMParser()
-  const serializer = new XMLSerializer()
-
-  convertpath.parse(file)
-
-  const Document = parser.parseFromString(
-    convertpath.toSimpleSvg(),
-    'application/xml'
-  )
-
+  const Document = parseSVG(file)
   const Svg = Document.documentElement
 
   Svg.setAttribute('viewBox', '0 0 24 24')
@@ -58,6 +89,14 @@ function process (file, basename) {
   fs.writeFileSync(`./svg/${basename}`, serializer.serializeToString(Document))
 
   return _ => inkscapeEdit(basename)
+}
+
+function parseSVG (file) {
+  convertpath.parse(file)
+  return parser.parseFromString(
+    convertpath.toSimpleSvg(),
+    'application/xml'
+  )
 }
 
 function inkscapeEdit (basename) {

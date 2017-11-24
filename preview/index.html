@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Document</title>
+  <style>
+    @font-face {
+      font-family: 'feather';
+      font-style: normal;
+      font-weight: 400;
+      src: url(../dest/feather.woff) format('woff'),
+           url(../dest/feather.ttf) format('truetype'),
+           url(../dest/feather.svg) format('svg');
+    }
+
+    i, .icomoon-liga {
+      /* use !important to prevent issues with browser extensions that change fonts */
+      font-family: 'feather' !important;
+      speak: none;
+      font-style: normal;
+      font-weight: normal;
+      font-variant: normal;
+      text-transform: none;
+      line-height: 1;
+      
+      /* Enable Ligatures ================ */
+      letter-spacing: 0;
+      -webkit-font-feature-settings: "liga";
+      -moz-font-feature-settings: "liga=1";
+      -moz-font-feature-settings: "liga";
+      -ms-font-feature-settings: "liga" 1;
+      font-feature-settings: "liga";
+      -webkit-font-variant-ligatures: discretionary-ligatures;
+      font-variant-ligatures: discretionary-ligatures;
+
+      /* Better Font Rendering =========== */
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+  </style>
+</head>
+<body>
+  <i class="feather">activity</i>
+</body>
+</html>
