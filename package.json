@@ -13,9 +13,8 @@
     "feather-icons": "^4.0.1",
     "mkdirp": "^0.5.1",
     "svgo": "^1.0.3",
-    "xmldom": "^0.1.27"
-  },
-  "devDependencies": {
+    "xmldom": "^0.1.27",
     "convertpath": "github:AngusFu/convertpath"
-  }
+  },
+  "devDependencies": {}
 }

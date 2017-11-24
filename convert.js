@@ -19,10 +19,8 @@ async function runTasks () {
 
   while (tasks.length) {
     await tasks.shift()()
-    await sleep(10)
+    await sleep(6)
   }
-
-  execSync('npm run svgo')
 }
 
 function process (file, basename) {
@@ -43,7 +41,7 @@ function process (file, basename) {
 
   Svg.setAttribute('viewBox', '0 0 24 24')
   Svg.setAttribute('enable-background', 'new 0 0 24 24')
-  Svg.setAttribute('fill', '#fff')
+  Svg.setAttribute('fill', 'rgba(0,0,0,0)')
 
   const stroke = {}
   const attrs = ['stroke', 'stroke-width', 'stroke-linecap', 'stroke-linejoin']
@@ -59,18 +57,17 @@ function process (file, basename) {
 
   fs.writeFileSync(`./svg/${basename}`, serializer.serializeToString(Document))
 
-  return function () {
-    inkscapeEdit(file, basename)
-  }
+  return _ => inkscapeEdit(basename)
 }
 
-function inkscapeEdit (file, basename) {
+function inkscapeEdit (basename) {
+  const file = `./svg/${basename}`
   // SEE:
   // 1. https://github.com/mtgibbs/inkscape-stroke-to-path/
   // 2. http://scruss.com/blog/2016/05/11/scripting-inkscape-kinda/
   const command = `
     inkscape
-      --file ./svg/${basename}
+      --file ${file}
       --verb EditSelectAll
       --verb StrokeToPath
       --verb FileSave
@@ -81,12 +78,15 @@ function inkscapeEdit (file, basename) {
     .trim()
 
   return new Promise((resolve, reject) => {
+   console.log(`>> Processing: ${basename}`)
     exec(command, (error, stdout, stderr) => {
       if (error) {
-        console.error(`error: ${error}`)
+        console.error(`>> Error: ${error}`)
         resolve(error)
       } else {
-        console.log(`file: ${basename}`)
+        console.log(`>> Processsing done: ${basename}`)
+        execSync(`npm run svgo ${file}`)
+        console.log(`>> Optimized by svgo: ${basename}`)
         resolve(basename)
       }
     })
@@ -94,15 +94,15 @@ function inkscapeEdit (file, basename) {
 }
 
 function writeHTML (files) {
-  const content = `<table>
-  <tr><th>original</th<th>converted</th></tr>${
+  const content = `<table align="center" style="text-align: center;">
+  <tr><th>original</th><th>converted</th></tr>${
     files.reduce((acc, name) =>
       `${acc}
       <tr>
         <td><img src="${path.join(sourceDir, name)}"></td>
         <td><img src="svg/${name}"></td>
       </tr>`
-    )
+    , '')
   }</table>`
   fs.writeFileSync('./compare.html', content)
 }
