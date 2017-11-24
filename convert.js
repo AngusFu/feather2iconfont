@@ -19,17 +19,18 @@ async function runTasks () {
   const icons = fs.readdirSync(sourceDir)
 
   mkdirp('svg')
+
+  const tasks = Array.from(icons)
+    .map(file =>
+      process(path.join(sourceDir, file), file)
+    )
+
+  while (tasks.length) {
+    await tasks.shift()()
+    await sleep(6)
+  }
+
   writeHTML(icons)
-
-  // const tasks = Array.from(icons)
-  //   .map(file =>
-  //     process(path.join(sourceDir, file), file)
-  //   )
-
-  // while (tasks.length) {
-  //   await tasks.shift()()
-  //   await sleep(6)
-  // }
 
   const glyphs = icons.map(basename => {
     const file = `./svg/${basename}`
@@ -60,10 +61,10 @@ async function runTasks () {
     ts: +new Date(),
     version: '1.0'
   }).buffer
-  fs.writeFileSync('./dest/feather.ttf', new Buffer(ttf))
+  fs.writeFileSync('./dest/feather.ttf', Buffer.from(ttf))
 
   const woff = ttf2woff(new Uint8Array(ttf))
-  fs.writeFileSync('./dest/feather.woff', new Buffer(woff.buffer))
+  fs.writeFileSync('./dest/feather.woff', Buffer.from(woff.buffer))
 }
 
 function process (file, basename) {
@@ -74,17 +75,24 @@ function process (file, basename) {
   Svg.setAttribute('enable-background', 'new 0 0 24 24')
   Svg.setAttribute('fill', 'rgba(0,0,0,0)')
 
-  const stroke = {}
+  // merge all path elements
+  const pathElem = Document.createElement('path')
   const attrs = ['stroke', 'stroke-width', 'stroke-linecap', 'stroke-linejoin']
 
   attrs.forEach(key => {
-    stroke[key] = key === 'stroke' ? '#000' : Svg.getAttribute(key)
+    pathElem.setAttribute(key, key === 'stroke' ? '#000' : Svg.getAttribute(key))
     Svg.removeAttribute(key)
   })
 
-  Array.from(Svg.childNodes).forEach(node =>
-    attrs.forEach(key => node.setAttribute(key, stroke[key]))
-  )
+  const d = Array.from(Svg.childNodes)
+    .map(node => {
+      Svg.removeChild(node)
+      return node.getAttribute('d')
+    })
+    .join(' ')
+
+  pathElem.setAttribute('d', d)
+  Svg.appendChild(pathElem)
 
   fs.writeFileSync(`./svg/${basename}`, serializer.serializeToString(Document))
 
@@ -117,7 +125,7 @@ function inkscapeEdit (basename) {
     .trim()
 
   return new Promise((resolve, reject) => {
-   console.log(`>> Processing: ${basename}`)
+    console.log(`>> Processing: ${basename}`)
     exec(command, (error, stdout, stderr) => {
       if (error) {
         console.error(`>> Error: ${error}`)
