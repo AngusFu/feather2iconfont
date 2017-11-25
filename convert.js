@@ -3,6 +3,7 @@ const path = require('path')
 const { exec, execSync } = require('child_process')
 const mkdirp = require('mkdirp')
 
+const { SVGPathData } = require('svg-pathdata')
 const convertpath = require('convertpath')
 const { DOMParser, XMLSerializer } = require('xmldom')
 const parser = new DOMParser()
@@ -25,10 +26,10 @@ async function runTasks () {
       process(path.join(sourceDir, file), file)
     )
 
-  while (tasks.length) {
-    await tasks.shift()()
-    await sleep(6)
-  }
+  // while (tasks.length) {
+  //   await tasks.shift()()
+  //   await sleep(6)
+  // }
 
   writeHTML(icons)
 
@@ -46,10 +47,12 @@ async function runTasks () {
       SVG.removeChild(path)
 
       return acc
-    }, '')
+    }, '').trim()
 
+    const glyphPath = new SVGPathData(d)
+    glyphPath.scale(520 / 24)
     const name = basename.replace('.svg', '')
-    return `<glyph unicode="${name}" glyph-name="${name.replace(/\d/g, '&#x3$&')}" d="${d.trim()}" />`
+    return `<glyph unicode="${name}" glyph-name="${name.replace(/\d/g, '&#x3$&')}" d="${glyphPath.encode()}" />`
   })
 
   const template = fs.readFileSync('./template.xml').toString()
@@ -151,7 +154,12 @@ function writeHTML (files) {
       </tr>`
     , '')
   }</table>`
-  fs.writeFileSync('./compare.html', content)
+  fs.writeFileSync('./preview/compare.html', content)
+  fs.writeFileSync(
+    './preview/index.html',
+    `<link rel=stylesheet href="./icon.css">` +
+      files.map(n => `<i class="feather">${n.replace('.svg', '')}</i>`).join('<br>')
+  )
 }
 
 function sleep (t) {

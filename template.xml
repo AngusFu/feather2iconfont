@@ -1,22 +1,14 @@
 <?xml version="1.0" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd" >
-<!--
-2016-2-8: Created with FontForge (http://fontforge.org)
--->
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1">
-<metadata>
-Created by FontForge 20151118 at Mon Feb  8 11:58:02 2016
- By shyndman
-Copyright 2015 Google, Inc. All Rights Reserved.
-</metadata>
+<metadata>Feather Icons</metadata>
 <defs>
-<font id="MaterialIcons-Regular" horiz-adv-x="512" >
+<font id="FeatherIcons-Regular" horiz-adv-x="512" >
   <font-face 
     font-family="Material Icons"
     font-weight="400"
     font-stretch="normal"
     units-per-em="512"
-    panose-1="2 0 5 3 0 0 0 0 0 0"
     ascent="512"
     descent="0"
     bbox="0 0 512 512"
